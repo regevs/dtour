@@ -65,10 +65,10 @@ class GeocodingCache:
         """
         
         self.shelve_filename = shelve_filename
-        self.shelve = shelve.open(self.shelve_filename)        
+        self.shelve_obj = shelve.open(self.shelve_filename)        
     
-    __get__ = self.shelve.__get__
-    __set__ = self.shelve.__set__
+    __get__ = shelve_obj.__get__
+    __set__ = shelve_obj.__set__
     
     def __del__(self):
         self.shelve.close()
