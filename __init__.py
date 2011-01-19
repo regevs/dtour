@@ -7,7 +7,7 @@ import inspect
 import os, os.path
 
 # Self imports
-from utils import *
+import utils
 import data_processing
 
 
@@ -22,7 +22,6 @@ reload(data_processing)
 # TODO: Remove when stable
 #
 GOOGLE_USER = "israelwineroute@gmail.com"
-GOOGLE_PASS = "dangivol"
 
 WINEDATA_KEY_1 = '0AhuwU_YYO9CzdGxwX04wRWo3dl9mejBNTU1sVl9yZEE'
 
@@ -32,10 +31,15 @@ WINEDATA_KEY_1 = '0AhuwU_YYO9CzdGxwX04wRWo3dl9mejBNTU1sVl9yZEE'
 
 # Build the directories - use the script's directory as reference
 scripts_dir = os.path.dirname(inspect.currentframe().f_code.co_filename)
-data_dir = os.path.join(os.path.split(scripts_dir)[0], 'data')
+data_dir = os.path.join(scripts_dir, 'data')
 
-GEOCODING_CACHE = os.path.join(data_dir, "geocache.shelve")
+GEOCODING_CACHE_FILE = os.path.join(data_dir, "geocache.shelve")
+PLACES_FILE = os.path.join(data_dir, "places_db.pcl")
 
 
+GC = data_processing.GeocodingCache(GEOCODING_CACHE_FILE)
+RD = data_processing.RecommenderData(PLACES_FILE, GC)
 
-
+# G = data_processing.GoogleSpreadsheetAcquisitor(GOOGLE_USER, "dangivol")
+# final = G.GetSpreadsheet(dtour.WINEDATA_KEY_1, 0)
+# RD.UpdateFromGoogle(final, verbose=True)

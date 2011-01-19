@@ -7,6 +7,8 @@ __author__ = "Regev Schweiger"
 import gdata.spreadsheet.service
 import geopy.geocoders
 import shelve
+import cPickle
+import os.path
 
 
 
@@ -54,11 +56,9 @@ class GoogleSpreadsheetAcquisitor:
             final_rows.append(d)
         return final_rows
             
-
 __all__.append('GeocodingCache')
 class GeocodingCache:
-
-    def __init___(self, shelve_filename):
+    def __init__(self, shelve_filename):
         """
         shelve_filename - The shelve filename in which to keep geocoding cached results.
         
@@ -66,10 +66,63 @@ class GeocodingCache:
         
         self.shelve_filename = shelve_filename
         self.shelve_obj = shelve.open(self.shelve_filename)        
+        self.geocoder = geopy.geocoders.Google(resource="maps", output_format="kml")
     
-    __get__ = shelve_obj.__get__
-    __set__ = shelve_obj.__set__
-    
+    def __getitem__(self, key):
+        if not self.shelve_obj.has_key(key):
+            try:
+                self.shelve_obj[key] = self.geocoder.geocode(key)
+            except:
+                self.shelve_obj[key] = (-1, -1)
+        return self.shelve_obj[key]
+            
     def __del__(self):
-        self.shelve.close()
+        self.shelve_obj.close()
 
+        
+__all__.append('RecommenderData')        
+class RecommenderData:    
+    def __init__(self, filename, geocoding_cache):
+        """
+        filename            - The filename containing the data 
+        geocoding_cache     - An instance of GeocodingCache that contains geocoding info
+        
+        """
+        
+        self.filename = filename
+        self.geocoding_cache = geocoding_cache
+        if os.path.exists(self.filename):
+            self.data = cPickle.load(file(self.filename, 'rb'))
+        else:
+            self.data = {}
+            
+        self.NO_LATLONG = None
+        
+    def UpdateFromGoogle(self, google_results, verbose=False):
+        """
+        Add or update information from data download from a google spreadsheet using GoogleSpreadsheetAcquisitor.
+        
+        google_results  - the results (return of GoogleSpreadsheetAcquisitor.GetSpreadsheet)
+        """
+        for n_result, result in enumerate(google_results):
+            if verbose:
+                print "Updating %d / %d - %s " % (n_result+1, len(google_results), result['address'])
+                
+            self.data[result['id']] = result
+            address = result['address']
+            if isinstance(address, str):
+                self.data[result['id']]['latlong'] = self.geocoding_cache[address][1]
+            else:
+                self.data[result['id']]['latlong'] = self.NO_LATLONG
+            if self.data[result['id']]['latlong'] == -1:
+                self.data[result['id']]['latlong'] = self.NO_LATLONG
+            
+    def Save(self):
+        """
+        Save current state
+        """
+        cPickle.dump(self.data, file(self.filename, 'wb'), -1)
+                
+    def __del__(self):
+        self.Save()
+        
