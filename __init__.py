@@ -10,13 +10,14 @@ import os, os.path
 import utils
 import data_processing
 import recommenders
-
+import weather
 
 
 # TODO: remove this when stable
 reload(utils)
 reload(data_processing)
 reload(recommenders)
+reload(weather)
 
 
 
@@ -42,9 +43,10 @@ PLACES_FILE = os.path.join(data_dir, "places_db.pcl")
 GC = data_processing.GeocodingCache(GEOCODING_CACHE_FILE)
 RD = data_processing.RecommenderData(PLACES_FILE, GC)
 
-def sync():
-    G = data_processing.GoogleSpreadsheetAcquisitor(GOOGLE_USER, "dangivol")
+def sync(passw, reset=True):
+    RD.Reset()
+    G = data_processing.GoogleSpreadsheetAcquisitor(GOOGLE_USER, passw)
     final = G.GetSpreadsheet(WINEDATA_KEY_1, 0)
     RD.UpdateFromGoogle(final, verbose=True)
 
-SW = recommenders.SimpleWineryRecommender(RD)
+SW = recommenders.SimpleWineryRecommender(RD, weather.RainyInJerusalem())
