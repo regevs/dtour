@@ -48,5 +48,6 @@ def sync(passw, reset=True):
     G = data_processing.GoogleSpreadsheetAcquisitor(GOOGLE_USER, passw)
     final = G.GetSpreadsheet(WINEDATA_KEY_1, 0)
     RD.UpdateFromGoogle(final, verbose=True)
+    Rd.Save()
 
 SW = recommenders.SimpleWineryRecommender(RD, weather.RainyInJerusalem())

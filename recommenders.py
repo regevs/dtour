@@ -71,6 +71,17 @@ class SimpleWineryRecommender:
         """
         Recommend a winery according to the specified parameters.
         
+        n_items     - The number of items to recommend (1 or more)
+        location    - a lat/long tuple, around which to search; can be None
+        size        - minimal size of a winery (1..4); can be None
+        expert_rank - minimal expert rank of a winery (1..5); can be None
+        kosher      - True is kosher is required, False or None else
+        visiting_center     - True is a visiting center is required, False or None else
+        visiting_center_free_admission -    True if a free visiting center is reuiqred, False or None else
+        visit_time          - Time around which to time your visit; given in seconds since epoch; can be None (and be ignored)
+                              e.g., for the current time; give time.time()
+        use_weather         - Use current weather conditions to filter out places (True/False, default is False)
+        
         """        
         #
         # Make sure the input is legal

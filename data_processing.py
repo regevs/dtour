@@ -60,9 +60,23 @@ class GoogleSpreadsheetAcquisitor:
             
 __all__.append('GeocodingCache')
 class GeocodingCache:
+    """
+    A geocoder with a builtin file cache. Can be accessed like a dictionary, and return
+    a tuple of text representation and a tuple of lat/long (as returned by google).
+    
+    Use like this:
+    
+    >>> G = GeocodingCache(filename)
+    >>> G["Jerusalem, Israel"]
+    (u'Jerusalem, Israel', (31.768861999999999, 35.203856000000002))
+    
+    
+    """
+    
+    
     def __init__(self, shelve_filename):
         """
-        shelve_filename - The shelve filename in which to keep geocoding cached results.
+        shelve_filename - The shelve filename in which to keep geocoding cached results.              
         
         """
         
@@ -83,7 +97,12 @@ class GeocodingCache:
 
         
 __all__.append('RecommenderData')        
-class RecommenderData:    
+class RecommenderData:
+    """
+    A class containing data for recommendation.
+    
+    Data is in the 'data' member.
+    """
 
     NO_LATLONG = None
     
