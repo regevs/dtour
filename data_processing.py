@@ -7,6 +7,8 @@ __author__ = "Regev Schweiger"
 import gdata.spreadsheet.service
 import geopy.geocoders
 import shelve
+import warnings
+
 import cPickle
 import os.path
 
@@ -82,6 +84,15 @@ class GeocodingCache:
         
 __all__.append('RecommenderData')        
 class RecommenderData:    
+
+    NO_LATLONG = None
+    
+    _legal_sizes = map(str, [1,2,3,4])
+    _legal_expert_ranks = map(str, [1,2,3,4,5])
+    _legal_kosher = ['Yes', 'No']
+    _legal_visiting_center = ['Yes', 'No']
+    
+
     def __init__(self, filename, geocoding_cache):
         """
         filename            - The filename containing the data 
@@ -96,7 +107,15 @@ class RecommenderData:
         else:
             self.data = {}
             
-        self.NO_LATLONG = None
+    def _ReturnIfLegal(self, uid, parameter, legal_values):
+        if isinstance(parameter, str):
+            if parameter in legal_values:
+                return parameter
+            else:
+                warnings.warn("ID %s: illegal value %s" % (uid, parameter))
+                return None
+        else:
+            return None
         
     def UpdateFromGoogle(self, google_results, verbose=False):
         """
@@ -107,21 +126,75 @@ class RecommenderData:
         for n_result, result in enumerate(google_results):
             if verbose:
                 print "Updating %d / %d - %s " % (n_result+1, len(google_results), result['address'])
-                
-            self.data[result['id']] = result
+            
+            # Fill information from the spreadsheet
+            uid = result['id']
+            if not self.data.has_key(uid):
+                self.data[uid] = {}
+            
+            # Raw information
+            self.data[uid]['raw'] = result
+            
+            # latlong (try geocoding if necessary)
             address = result['address']
             if isinstance(address, str):
-                self.data[result['id']]['latlong'] = self.geocoding_cache[address][1]
+                self.data[uid]['latlong'] = self.geocoding_cache[address][1]
             else:
-                self.data[result['id']]['latlong'] = self.NO_LATLONG
-            if self.data[result['id']]['latlong'] == -1:
-                self.data[result['id']]['latlong'] = self.NO_LATLONG
+                self.data[uid]['latlong'] = self.NO_LATLONG
+            if self.data[uid]['latlong'] == -1:
+                self.data[uid]['latlong'] = self.NO_LATLONG
+                
+            # size
+            self.data[uid]['size'] = self._ReturnIfLegal(uid, result['size'], self._legal_sizes)
+            if self.data[uid]['size'] != None:
+                self.data[uid]['size'] = int(self.data[uid]['size'])
+              
+            # expert rank
+            self.data[uid]['expert_rank'] = self._ReturnIfLegal(uid, result['rogovrank'], self._legal_expert_ranks)
+            if self.data[uid]['expert_rank'] != None:
+                self.data[uid]['expert_rank'] = int(self.data[uid]['expert_rank'])
+            
+            # kosher
+            self.data[uid]['kosher'] = (self._ReturnIfLegal(uid, result['kosher'], self._legal_kosher) == 'Yes')
+            
+            # visiting center
+            self.data[uid]['visiting_center'] = (self._ReturnIfLegal(uid, result['visitingcenter'], self._legal_visiting_center) == 'Yes')
+            
+            # visiting center free admission
+            val = result['visitorcenteradmition']
+            if val == None:
+                self.data[uid]['visiting_center_free_admission'] = None
+            elif val == "Free":
+                self.data[uid]['visiting_center_free_admission'] = True
+            else:
+                self.data[uid]['visiting_center_free_admission'] = False
+                
+            # time
+            if not self.data[uid].has_key('hours'):
+                self.data[uid]['hours'] = {}                
+            for day in ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']:            
+                val = result[day]
+                if val == None:
+                    self.data[uid]['hours'][day] = None
+                elif val.isdigit():
+                    self.data[uid]['hours'][day] = int(val)
+                else:
+                    self.data[uid]['hours'][day] = None
+                
+                
+            
             
     def Save(self):
         """
         Save current state
         """
         cPickle.dump(self.data, file(self.filename, 'wb'), -1)
+        
+    def Reset(self):
+        """
+        Reset all data
+        """
+        self.data = {}
                 
     def __del__(self):
         self.Save()
