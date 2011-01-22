@@ -66,7 +66,8 @@ class SimpleWineryRecommender:
                   visiting_center = None,
                   visiting_center_free_admission = None,
                   visit_time = None,
-                  use_weather = False
+                  use_weather = False,
+                  use_only_ids = None
                  ):
         """
         Recommend a winery according to the specified parameters.
@@ -81,7 +82,7 @@ class SimpleWineryRecommender:
         visit_time          - Time around which to time your visit; given in seconds since epoch; can be None (and be ignored)
                               e.g., for the current time; give time.time()
         use_weather         - Use current weather conditions to filter out places (True/False, default is False)
-        
+        use_only_ids        - (debugging) Pretend only these IDs exist.
         """        
         #
         # Make sure the input is legal
@@ -98,8 +99,6 @@ class SimpleWineryRecommender:
         self._CheckLegalValues("visiting_center", visiting_center, self._legal_visiting_center)
         self._CheckLegalValues("visiting_center_free_admission", visiting_center_free_admission, self._legal_visiting_center_free_admission)
         
-        if (visit_time != None) and (not isinstance(visit_time, float)):
-            raise ValueError("visit_time was not a legal time float. visit_time should be since the epoch, (e.g. time.time()) (given: %s)" % str(visit_time))
             
         #
         # Filter all irrelevant places
@@ -109,6 +108,9 @@ class SimpleWineryRecommender:
         for uid, info in self.recommender_data.data.iteritems():
             
             add_item = True
+            
+            if add_item and (use_only_ids != None) and (uid not in use_only_ids):
+                add_item = False
             
             if add_item and (info['latlong'] == None):
                 add_item = False
