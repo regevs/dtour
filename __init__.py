@@ -53,3 +53,8 @@ def sync(passw, reset=True):
 
 SW = recommenders.SimpleWineryRecommender(RD, weather.GoogleWeather())
 SWJ = recommenders.SimpleWineryRecommender(RD, weather.RainyInJerusalem())
+
+
+def newid():
+    import random
+    return hex(random.randrange(0,2**64))[2:-1].rjust(16, '0')
