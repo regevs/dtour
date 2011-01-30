@@ -96,7 +96,7 @@ class GeocodingCache:
         self.shelve_obj.close()
 
         
-__all__.append('RecommenderData')        
+
 class RecommenderData:
     """
     A class containing data for recommendation.
@@ -104,23 +104,21 @@ class RecommenderData:
     Data is in the 'data' member.
     """
 
-    NO_LATLONG = None
-    
-    _legal_sizes = map(str, [1,2,3,4])
-    _legal_expert_ranks = map(str, [1,2,3,4,5])
-    _legal_kosher = ['Yes', 'No']
-    _legal_visiting_center = ['Yes', 'No']
-    
-
-    def __init__(self, filename, geocoding_cache):
+    def __init__(self, filename, google_key=None, google_email=None):
         """
-        filename            - The filename containing the data 
-        geocoding_cache     - An instance of GeocodingCache that contains geocoding info
+        filename            - The filename containing the data         
         
+        Optional:
+        google_key          - A key for the google spreadshete from which the object can be synchronized
+        google_email        - The email with which to use google
+
         """
         
         self.filename = filename
-        self.geocoding_cache = geocoding_cache
+
+        self.google_key = google_key
+        self.google_email = google_email
+
         if os.path.exists(self.filename):
             self.data = cPickle.load(file(self.filename, 'rb'))
         else:
@@ -136,6 +134,61 @@ class RecommenderData:
         else:
             return None
         
+    def Sync(self, password, verbose=True, reset=True, sheet_number=0):
+        assert self.google_key != None
+        if reset:
+            self.Reset()
+        self.google_spreadsheet_acquisitor = GoogleSpreadsheetAcquisitor(self.google_email, password)
+        self.raw_google_results = self.google_spreadsheet_acquisitor.GetSpreadsheet(self.google_key, sheet_number)
+        self.UpdateFromGoogle(self.raw_google_results, verbose=verbose)
+        self.Save()
+
+
+    def UpdateFromGoogle(self, google_results, verbose=False):            
+        raise NotImplementedError()
+            
+            
+    def Save(self):
+        """
+        Save current state
+        """
+        cPickle.dump(self.data, file(self.filename, 'wb'), -1)
+        
+    def Reset(self):
+        """
+        Reset all data
+        """
+        self.data = {}
+                
+    def __del__(self):
+        self.Save()
+        
+
+__all__.append("PlacesRecommenderData")
+class PlacesRecommenderData(RecommenderData):
+
+    NO_LATLONG = None
+    
+    _legal_sizes = map(str, [1,2,3,4])
+    _legal_expert_ranks = map(str, [1,2,3,4,5])
+    _legal_kosher = ['Yes', 'No']
+    _legal_visiting_center = ['Yes', 'No']
+
+
+    def __init__(self, filename, geocoding_cache, google_key=None, google_email=None):
+        """
+        filename            - The filename containing the data 
+        geocoding_cache     - An instance of GeocodingCache that contains geocoding info
+        
+        Optional:
+        google_key          - A key for the google spreadshete from which the object can be synchronized
+        google_email        - The email with which to use google
+
+        """
+        RecommenderData.__init__(self, filename, google_key, google_email)
+        self.geocoding_cache = geocoding_cache
+
+   
     def UpdateFromGoogle(self, google_results, verbose=False):
         """
         Add or update information from data download from a google spreadsheet using GoogleSpreadsheetAcquisitor.
@@ -199,22 +252,58 @@ class RecommenderData:
                     self.data[uid]['hours'][day] = int(val)
                 else:
                     self.data[uid]['hours'][day] = None
-                
-                
-            
-            
-    def Save(self):
+
+
+
+__all__.append("UsersRecommenderData")
+class UsersRecommenderData(RecommenderData):
+
+    def UpdateFromGoogle(self, google_results, verbose=False):
         """
-        Save current state
-        """
-        cPickle.dump(self.data, file(self.filename, 'wb'), -1)
+        Add or update information from data download from a google spreadsheet using GoogleSpreadsheetAcquisitor.
         
-    def Reset(self):
+        google_results  - the results (return of GoogleSpreadsheetAcquisitor.GetSpreadsheet)
         """
-        Reset all data
+        for n_result, result in enumerate(google_results):
+            if verbose:
+                print "Updating %d / %d - %s " % (n_result+1, len(google_results), result['id'])    
+
+            # Fill information from the spreadsheet
+            uid = result['id']
+            if not self.data.has_key(uid):
+                self.data[uid] = {}
+            
+            # Raw information
+            self.data[uid]['raw'] = result
+
+__all__.append("RatingRecommenderData")
+class RatingRecommenderData(RecommenderData):
+
+    _legal_rating = map(str, [1,2,3,4,5])
+
+    def UpdateFromGoogle(self, google_results, verbose=False):
         """
-        self.data = {}
-                
-    def __del__(self):
-        self.Save()
+        Add or update information from data download from a google spreadsheet using GoogleSpreadsheetAcquisitor.
         
+        google_results  - the results (return of GoogleSpreadsheetAcquisitor.GetSpreadsheet)
+        """
+        for n_result, result in enumerate(google_results):
+            if verbose:
+                print "Updating %d / %d - (%s, %s) " % (n_result+1, len(google_results), result['placeid'], result['userid'])    
+
+            # Fill information from the spreadsheet
+            placeid = result['placeid']
+            userid = result['userid']
+            uid = (placeid, userid)
+            if not self.data.has_key(uid):
+                self.data[uid] = {}
+            
+            # Raw information
+            self.data[uid]['raw'] = result   
+            self.data[uid]['placeid'] = placeid
+            self.data[uid]['userid'] = userid
+
+            # rating
+            self.data[uid]['rating'] = self._ReturnIfLegal(uid, result['rating'], self._legal_rating)
+            if self.data[uid]['rating'] != None:
+                self.data[uid]['rating'] = int(self.data[uid]['rating'])
