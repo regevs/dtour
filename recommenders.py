@@ -54,8 +54,8 @@ class SimpleWineryRecommender:
         else:
             normalized_distance = float(max_distance - distance) / max_distance
         normalized_expert_rank = (expert_rank - 1.0)/4.0        
-        return normalized_distance*weights[0] + normalized_expert_rank*weights[1]
-        
+        return normalized_distance*weights[0] + normalized_expert_rank*weights[1]    
+            
     
     def Recommend(self,
                   n_items = 10,

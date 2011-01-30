@@ -12,6 +12,7 @@ import utils
 import data_processing
 import recommenders
 import weather
+import integration
 
 
 # TODO: remove this when stable
@@ -19,6 +20,7 @@ reload(utils)
 reload(data_processing)
 reload(recommenders)
 reload(weather)
+reload(integration)
 
 
 
@@ -26,6 +28,7 @@ reload(weather)
 # TODO: Remove when stable
 #
 GOOGLE_USER = "israelwineroute@gmail.com"
+GOOGLE_API_KEY = "ABQIAAAAW9I8jXDa_ffCaqdiN7Yv_BSlop2PrIEswDUepZEwXTSfTXLhJxTBR-lwf2SKuyYwhBvcgrGPaPygNQ"
 
 WINEDATA_KEY_1 = '0AhuwU_YYO9CzdGxwX04wRWo3dl9mejBNTU1sVl9yZEE'
 
@@ -58,3 +61,5 @@ SWJ = recommenders.SimpleWineryRecommender(RD, weather.RainyInJerusalem())
 def newid():
     import random
     return hex(random.randrange(0,2**64))[2:-1].rjust(16, '0')
+
+
