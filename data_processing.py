@@ -6,10 +6,11 @@ __author__ = "Regev Schweiger"
 
 import gdata.spreadsheet.service
 import geopy.geocoders
+
 import shelve
 import warnings
-
 import cPickle
+import random
 import os.path
 
 
@@ -134,7 +135,7 @@ class RecommenderData:
         else:
             return None
         
-    def Sync(self, password, verbose=True, reset=True, sheet_number=0):
+    def Sync(self, password, verbose=False, reset=True, sheet_number=0):
         assert self.google_key != None
         if reset:
             self.Reset()
@@ -307,3 +308,21 @@ class RatingRecommenderData(RecommenderData):
             self.data[uid]['rating'] = self._ReturnIfLegal(uid, result['rating'], self._legal_rating)
             if self.data[uid]['rating'] != None:
                 self.data[uid]['rating'] = int(self.data[uid]['rating'])
+
+def select_rating_subset(movielens_filename, user_ids, places_ids):
+    n_users = len(user_ids)
+    n_places = len(places_ids)
+
+    lines = [map(int, x.split('\t')[:3]) for x in open(movielens_filename).read().split('\n') if x]                
+    total_users = len(set([l[0] for l in lines]))
+    total_places = len(set([l[1] for l in lines]))
+
+    assert n_users <= total_users
+    subset_users = random.sample(range(1,total_users+1), n_users)
+
+    assert n_places <= total_places
+    subset_places = random.sample(range(1,total_places+1), n_places)
+
+    subset_rating = [[user_ids[subset_users.index(l[0])], places_ids[subset_places.index(l[1])], l[2]] for l in lines if l[0] in subset_users and l[1] in subset_places]
+    return subset_rating
+

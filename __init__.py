@@ -52,6 +52,8 @@ PLACES_FILE 	= os.path.join(data_dir, "places_db.pcl")
 USERS_FILE 		= os.path.join(data_dir, "users_db.pcl")
 RATING_FILE 	= os.path.join(data_dir, "rating_db.pcl")
 
+MOVIELENS_100K_FILE = os.path.join(data_dir, "datasets", "movielens", "100k", "u.data")
+
 
 GC = data_processing.GeocodingCache(GEOCODING_CACHE_FILE)
 
@@ -79,3 +81,6 @@ def newid():
     import random
     return hex(random.randrange(0,2**64))[2:-1].rjust(16, '0')
 
+def csvwrite(rows, filename=r"c:\temp\regev.csv"):
+	import csv
+	csv.writer(file(filename, 'wb'), lineterminator='\n').writerows(rows)
