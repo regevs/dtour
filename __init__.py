@@ -67,8 +67,8 @@ RD = RD_places
 
 
 
-SW = recommenders.SimpleWineryRecommender(RD, weather.GoogleWeather())
-SWJ = recommenders.SimpleWineryRecommender(RD, weather.RainyInJerusalem())
+SW = recommenders.SimpleWineryRecommender(RD_places, weather.GoogleWeather())
+SWJ = recommenders.SimpleWineryRecommender(RD_places, weather.RainyInJerusalem())
 
 
 
@@ -84,3 +84,7 @@ def newid():
 def csvwrite(rows, filename=r"c:\temp\regev.csv"):
 	import csv
 	csv.writer(file(filename, 'wb'), lineterminator='\n').writerows(rows)
+
+def geocode(place):
+	return GC[place][1]
+

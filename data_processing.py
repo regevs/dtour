@@ -105,6 +105,8 @@ class RecommenderData:
     Data is in the 'data' member.
     """
 
+    data = {}
+
     def __init__(self, filename, google_key=None, google_email=None):
         """
         filename            - The filename containing the data         
@@ -147,7 +149,10 @@ class RecommenderData:
 
     def UpdateFromGoogle(self, google_results, verbose=False):            
         raise NotImplementedError()
-            
+
+    def __getitem__(self, key):
+        return self.data[key]
+
             
     def Save(self):
         """
