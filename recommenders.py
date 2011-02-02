@@ -143,16 +143,19 @@ class Recommender:
         # Sort all relevant places
         #
         self._scores = {}
+        self._aux_data = {}
         for uid in relevant_places:
 
             distance    = self._Distance(self._places_recommender_data[uid]['latlong'], location)                    
-            rating      = self._recommender_system.PredictRating(userid, uid)            
+            rating      = self._recommender_system.PredictRating(userid, uid, True)            
                 
+            self._aux_data[uid] = (uid, distance, rating)
             self._scores[uid] = self._integration_sorter.Score(distance=distance, rating=rating, required_radius=required_radius)
         
         best = sorted(relevant_places, key=lambda uid: self._scores[uid], reverse=True)[:n_items]
+        with_data = [self._aux_data[b] for b in best] 
                         
-        return best
+        return with_data
 
 
 
@@ -226,7 +229,26 @@ class WeightedSlopeOneRecommender(Recommender):
                              )        
      
       
-    
+__all__.append('WeightedSlopeOneRecommender')
+class PearsonRecommender(Recommender):
+
+
+    def __init__(self, 
+                 places_recommender_data,
+                 users_recommender_data,
+                 rating_recommender_data, 
+                 weather_client=None):
+        
+        Recommender.__init__(self, 
+                             places_recommender_data            = places_recommender_data,
+                             weather_client                     = weather_client,
+                             integration_sorter_class           = integration.StupidIntegratorSorter,
+                             integration_filter_class           = integration.BasicIntegratorFilter,
+                             recommender_system                 = recommender_systems.collaborative_filtering.PearsonRecommenderSystem(
+                                                                    places_recommender_data,
+                                                                    users_recommender_data,
+                                                                    rating_recommender_data)
+                             )        
            
     
     

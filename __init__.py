@@ -8,7 +8,7 @@ import os, os.path
 import time
 
 # Self imports
-import utils
+import misc
 import data_processing
 import recommenders
 import recommender_systems.evaluation
@@ -17,7 +17,7 @@ import integration
 
 
 # TODO: remove this when stable
-reload(utils)
+reload(misc)
 reload(data_processing)
 reload(recommenders)
 reload(recommender_systems.evaluation)
@@ -71,6 +71,8 @@ RD = RD_places
 # Different versions of recommenders
 SLO = recommenders.SlopeOneRecommender(RD_places, RD_users, RD_rating, weather.GoogleWeather())
 WSLO = recommenders.WeightedSlopeOneRecommender(RD_places, RD_users, RD_rating, weather.GoogleWeather())
+
+PEAR = recommenders.PearsonRecommender(RD_places, RD_users, RD_rating, weather.GoogleWeather())
 
 SW = recommenders.SimpleWineryRecommender(RD_places, weather.GoogleWeather())
 SWJ = recommenders.SimpleWineryRecommender(RD_places, weather.RainyInJerusalem())

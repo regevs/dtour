@@ -11,8 +11,6 @@ import random
 import csv
 import inspect
 
-# Self imports
-from utils import *
 
 
 #
@@ -174,7 +172,6 @@ class StupidIntegratorSorter(IntegratorSorter):
 # Helping functions for the generation of tests cases for the integration sorter
 #
 
-@public
 def random_case():  
     required_radius = [5, 10, 20, 50, 100, 150, 200]
     possible_rating = [1, 2, 3, 4, 5]
@@ -192,7 +189,7 @@ def random_case():
     return (radius, rating1, distance1, rating2, distance2)
 
 
-@public
+
 def create_test_cases(n_cases, filename):   
     cases = [random_case() for i in xrange(n_cases)]
     writer = csv.writer(file(filename, 'wb'), lineterminator='\n')
