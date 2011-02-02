@@ -2,7 +2,7 @@
 # Recommender Algorithms - Base class
 #
 __all__ = []
-__author__ = "Regev Schweiger"
+__author__ = "Regev S"
 
 __all__.append("RecommenderSystem")
 class RecommenderSystem(object):

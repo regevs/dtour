@@ -2,7 +2,7 @@
 # Integration Score 
 #
 __all__ = []
-__author__ = "Regev Schweiger"
+__author__ = "Regev S"
 
 # Python imports
 import geopy.distance

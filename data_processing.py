@@ -2,7 +2,7 @@
 # Data acquisition and processing
 #
 __all__ = []
-__author__ = "Regev Schweiger"
+__author__ = "Regev S"
 
 import gdata.spreadsheet.service
 import geopy.geocoders

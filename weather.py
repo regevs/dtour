@@ -2,7 +2,7 @@
 # Weather 
 #
 __all__ = []
-__author__ = "Regev Schweiger"
+__author__ = "Regev S"
 
 
 import pywapi

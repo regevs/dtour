@@ -2,7 +2,7 @@
 # Recommender Algorithms - Collaborative Filtering
 #
 __all__ = []
-__author__ = "Regev Schweiger"
+__author__ = "Regev S"
 
 
 import warnings

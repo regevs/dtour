@@ -1,7 +1,7 @@
 #
 # Useful utilities
 # 
-__author__ = "Regev Schweiger"
+__author__ = "Regev S"
 
 
 import sys
