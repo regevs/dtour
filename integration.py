@@ -26,9 +26,6 @@ class IntegratorFilter(object):
     pass
 
        
-    def _CheckLegalValues(self, parameter_name, parameter, legal_values):
-        if (parameter != None) and (parameter not in legal_values):
-            raise ValueError("%s should be one of %s (given: %s)" % (parameter_name, str(legal_values), str(parameter)))    
 
 
 
@@ -41,11 +38,6 @@ class IntegratorFilter(object):
 __all__.append("BasicIntegratorFilter")
 class BasicIntegratorFilter(IntegratorFilter):
 
-    _legal_sizes = [1,2,3,4]
-    _legal_expert_ranks = [1,2,3,4,5]
-    _legal_kosher = [True, False]
-    _legal_visiting_center = [True, False]
-    _legal_visiting_center_free_admission = [True, False]
     
     _delta_time_before_close = 1*60*60       # (in seconds)    
 
@@ -59,31 +51,6 @@ class BasicIntegratorFilter(IntegratorFilter):
                   use_weather = False,
                   use_only_ids = None,
                   weather_client = None):
-        """
-        Recommend a winery according to the specified parameters.
-        
-        size        - minimal size of a winery (1..4); can be None
-        expert_rank - minimal expert rank of a winery (1..5); can be None
-        kosher      - True is kosher is required, False or None else
-        visiting_center     - True is a visiting center is required, False or None else
-        visiting_center_free_admission -    True if a free visiting center is reuiqred, False or None else
-        visit_time          - Time around which to time your visit; given in seconds since epoch; can be None (and be ignored)
-                              e.g., for the current time; give time.time()
-        use_weather         - Use current weather conditions to filter out places (True/False, default is False)
-        use_only_ids        - (debugging) Pretend only these IDs exist.
-
-        weather_client      - A client to have weather info
-        """        
-
-        #
-        # Make sure the input is legal
-        #
-        self._CheckLegalValues("size", size, self._legal_sizes)
-        self._CheckLegalValues("expert_rank", expert_rank, self._legal_expert_ranks)
-        self._CheckLegalValues("kosher", kosher, self._legal_kosher)
-        self._CheckLegalValues("visiting_center", visiting_center, self._legal_visiting_center)
-        self._CheckLegalValues("visiting_center_free_admission", visiting_center_free_admission, self._legal_visiting_center_free_admission)
-
         #
         # Copy all arguments to members
         #

@@ -125,7 +125,7 @@ class RecommenderData:
         if os.path.exists(self.filename):
             self.data = cPickle.load(file(self.filename, 'rb'))
         else:
-            self.data = {}
+            self.Reset()
             
     def _ReturnIfLegal(self, uid, parameter, legal_values):
         if isinstance(parameter, str):
@@ -153,6 +153,10 @@ class RecommenderData:
     def __getitem__(self, key):
         return self.data[key]
 
+    def keys(self):
+        return self.data.keys()
+
+    Keys = keys
             
     def Save(self):
         """
@@ -287,12 +291,21 @@ class RatingRecommenderData(RecommenderData):
 
     _legal_rating = map(str, [1,2,3,4,5])
 
+    def Reset(self):
+        """
+        Reset all data
+        """
+        RecommenderData.Reset(self)
+        self.data['by_user'] = {}
+        self.data['by_place'] = {}
+
     def UpdateFromGoogle(self, google_results, verbose=False):
         """
         Add or update information from data download from a google spreadsheet using GoogleSpreadsheetAcquisitor.
         
         google_results  - the results (return of GoogleSpreadsheetAcquisitor.GetSpreadsheet)
         """
+        
         for n_result, result in enumerate(google_results):
             if verbose:
                 print "Updating %d / %d - (%s, %s) " % (n_result+1, len(google_results), result['placeid'], result['userid'])    
@@ -300,19 +313,42 @@ class RatingRecommenderData(RecommenderData):
             # Fill information from the spreadsheet
             placeid = result['placeid']
             userid = result['userid']
-            uid = (placeid, userid)
-            if not self.data.has_key(uid):
-                self.data[uid] = {}
+            rating = result['rating']
+            
+            if not self.data['by_user'].has_key(userid):
+                self.data['by_user'][userid] = {}
+            if not self.data['by_user'][userid].has_key(placeid):
+                self.data['by_user'][userid][placeid] = {}
+
+            if not self.data['by_place'].has_key(placeid):
+                self.data['by_place'][placeid] = {}
+            if not self.data['by_place'][placeid].has_key(userid):
+                self.data['by_place'][placeid][userid] = {}
             
             # Raw information
-            self.data[uid]['raw'] = result   
-            self.data[uid]['placeid'] = placeid
-            self.data[uid]['userid'] = userid
-
+            self.data['by_user'][userid][placeid]['raw'] = result   
+            self.data['by_place'][placeid][userid]['raw'] = result   
+            
             # rating
-            self.data[uid]['rating'] = self._ReturnIfLegal(uid, result['rating'], self._legal_rating)
-            if self.data[uid]['rating'] != None:
-                self.data[uid]['rating'] = int(self.data[uid]['rating'])
+            rating = self._ReturnIfLegal((userid, placeid), rating, self._legal_rating)
+            if rating != None:
+                rating = int(rating)
+
+            self.data['by_user'][userid][placeid]['rating'] = rating
+            self.data['by_place'][placeid][userid]['rating'] = rating
+
+
+            
+
+        
+        
+
+
+
+#
+# For adaptation of datasets
+#
+
 
 def select_rating_subset(movielens_filename, user_ids, places_ids):
     n_users = len(user_ids)

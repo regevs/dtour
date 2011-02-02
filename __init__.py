@@ -11,6 +11,7 @@ import time
 import utils
 import data_processing
 import recommenders
+import recommender_systems.evaluation
 import weather
 import integration
 
@@ -19,6 +20,7 @@ import integration
 reload(utils)
 reload(data_processing)
 reload(recommenders)
+reload(recommender_systems.evaluation)
 reload(weather)
 reload(integration)
 
@@ -66,11 +68,18 @@ RD_rating 	= data_processing.RatingRecommenderData(RATING_FILE, RATING_KEY_1, GO
 RD = RD_places
 
 
+# Different versions of recommenders
+SLO = recommenders.SlopeOneRecommender(RD_places, RD_users, RD_rating, weather.GoogleWeather())
+WSLO = recommenders.WeightedSlopeOneRecommender(RD_places, RD_users, RD_rating, weather.GoogleWeather())
 
 SW = recommenders.SimpleWineryRecommender(RD_places, weather.GoogleWeather())
 SWJ = recommenders.SimpleWineryRecommender(RD_places, weather.RainyInJerusalem())
 
 
+
+
+# Evaluators
+MAE = recommender_systems.evaluation.AllButOneMeanAverageError()
 
 
 #
