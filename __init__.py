@@ -41,7 +41,6 @@ reload(integration)
 GOOGLE_USER = "israelwineroute@gmail.com"
 GOOGLE_API_KEY = "ABQIAAAAW9I8jXDa_ffCaqdiN7Yv_BSlop2PrIEswDUepZEwXTSfTXLhJxTBR-lwf2SKuyYwhBvcgrGPaPygNQ"
 
-#PLACES_KEY_1 = '0AhuwU_YYO9CzdGxwX04wRWo3dl9mejBNTU1sVl9yZEE'
 PLACES_KEY_1 	= 'tlp_N0Ej7v_fz0MMMlV_rdA'
 USERS_KEY_1 	= 't2ps1aNIOmQKb-qXMjtWfFg'
 RATING_KEY_1 	= 'tvAEWLlgopSFsWrdwyWOURg'

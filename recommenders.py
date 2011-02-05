@@ -159,11 +159,11 @@ class Recommender:
             distance    = self._Distance(self._places_recommender_data[uid]['latlong'], location)                    
             rating      = self._recommender_system.PredictRating(userid, uid, True)            
                 
-            self._aux_data[uid] = (uid, self._places_recommender_data[uid]['raw']['wineryname'], distance, rating)
+            self._aux_data[uid] = (uid, self._places_recommender_data[uid]['raw']['wineryname'], distance / 1000.0, rating)
             self._scores[uid] = self._integration_sorter.Score(distance=distance, rating=rating, required_radius=required_radius)
         
         best = sorted(relevant_places, key=lambda uid: self._scores[uid], reverse=True)[:n_items]
-        with_data = [NiceList(self._aux_data[b], ["ID", "Name", "Air Distance", "Predicted Rating"]) for b in best] 
+        with_data = [NiceList(self._aux_data[b], ["ID", "Name", "Distance (km)", "Predicted Rating"]) for b in best] 
                         
         return with_data
 
