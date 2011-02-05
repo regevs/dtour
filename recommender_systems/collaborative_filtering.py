@@ -6,8 +6,9 @@ __author__ = "Regev S"
 
 
 import warnings
+from numpy import *
 
-# Self impots
+# Self imports
 import base
 
 class SlopeOneRecommenderSystem(base.RecommenderSystem):
@@ -110,22 +111,30 @@ class PearsonRecommenderSystem(base.RecommenderSystem):
 	def CalculateUserAverages(self):
 
 		self.user_averages = {}
+		# self.user_sigmas = {}
 
 		all_users = self.users_recommender_data.keys()
 
 		for i, userid_i in enumerate(all_users):
 			
-			total_rating = 0.0
-			n_rating = 0
+			ratings = []			
 
 			for placeid, info in self.rating_recommender_data['by_user'].get(userid_i, {}).iteritems():
-				total_rating += info['rating']				
-				n_rating += 1
-			
+				ratings.append(info['rating']				)
+				
+			n_rating = len(ratings)
+
 			if n_rating == 0:
-				self.user_averages[userid_i] = self._default_average_rating
+				self.user_averages[userid_i] = self._default_average_rating				
 			else:
-				self.user_averages[userid_i] = float(total_rating) / n_rating
+				self.user_averages[userid_i] = sum(ratings) / n_rating
+
+			# if n_rating == 0:
+			# 	self.user_sigmas[userid_i] = 1.0
+			# else:
+			# 	self.user_sigmas[userid_i] = sum([float(r - self.user_averages[userid_i])**2 / (n_rating*2) for r in ratings])**0.5
+			# if self.user_sigmas[userid_i] == 0.0:
+			# 	self.user_sigmas[userid_i] = 1.0
 		
 
 	def CalculateUserSimilarityMatrix(self):
@@ -182,7 +191,7 @@ class PearsonRecommenderSystem(base.RecommenderSystem):
 			dev =  self.rating_recommender_data['by_place'][placeid][userid_v]['rating'] - self.user_averages[userid_v]
 			weight = self.user_sim_matrix[userid][userid_v]
 
-			total_prediction += weight * dev
+			total_prediction += weight * dev 
 			total_weights += abs(weight)
 
 		averaged_prediction = self.user_averages[userid] 

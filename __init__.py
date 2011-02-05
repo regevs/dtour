@@ -11,6 +11,9 @@ import time
 import misc
 import data_processing
 import recommenders
+import recommender_systems
+import recommender_systems.simple
+import recommender_systems.collaborative_filtering
 import recommender_systems.evaluation
 import weather
 import integration
@@ -20,6 +23,9 @@ import integration
 reload(misc)
 reload(data_processing)
 reload(recommenders)
+reload(recommender_systems)
+reload(recommender_systems.simple)
+reload(recommender_systems.collaborative_filtering)
 reload(recommender_systems.evaluation)
 reload(weather)
 reload(integration)
