@@ -15,7 +15,7 @@ class ExpertRating(base.RecommenderSystem):
 	def __init__(self, places_recommender_data):
 		base.RecommenderSystem.__init__(self, places_recommender_data)
 
-	def PredictRating(self, userid, placeid, force_predict=False):
+	def PredictRatingRaw(self, userid, placeid, force_predict=False):
 		expert_rank = self.places_recommender_data[placeid]['expert_rank']
 		if expert_rank != None:
 			return expert_rank
@@ -31,7 +31,7 @@ class ExpertRating(base.RecommenderSystem):
 __all__.append("AverageRating")
 class AverageRating(base.RecommenderSystem):
 
-	def PredictRating(self, userid, placeid, force_predict=False):
+	def PredictRatingRaw(self, userid, placeid, force_predict=False):
 		return self._default_rating
 
 
@@ -74,6 +74,6 @@ class AverageUserRating(base.RecommenderSystem):
 			else:
 				self.user_averages[userid_i] = float(total_rating) / n_rating
 
-	def PredictRating(self, userid, placeid, force_predict=False):
+	def PredictRatingRaw(self, userid, placeid, force_predict=False):
 		return self.user_averages[userid]
 

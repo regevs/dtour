@@ -40,6 +40,29 @@ class RecommenderSystem(object):
 			self._default_rating = 1
 
 	def PredictRating(self, userid, placeid, force_predict=False):
+
+		# If the rating already exists, just return it, unless mentioned otherwise		
+		if (not force_predict) and self.rating_recommender_data['by_user'][userid].has_key(placeid):
+			return self.rating_recommender_data['by_user'][userid][placeid]['rating']
+
+		averaged_prediction = self.PredictRatingRaw(userid, placeid, force_predict=force_predict)
+
+		# post processing:
+		# if we couldn't predict, return default value
+		if averaged_prediction == -1:
+			ret = self._default_rating
+
+		# check boundaries
+		elif averaged_prediction < self._min_rating:
+			ret = self._min_rating
+		elif averaged_prediction > self._max_rating:
+			ret = self._max_rating
+		else:
+			ret = averaged_prediction
+
+		return ret
+
+	def PredictRatingRaw(self, userid, placeid, force_predict=False):
 		raise NotImplementedError()
 
 

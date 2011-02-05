@@ -30,6 +30,8 @@ class Recommender:
         self._integration_filter_class = integration_filter_class
         self._recommender_system = recommender_system
 
+        self._check_userid = False
+
 
 
     def _Distance(self, latlong1, latlong2):
@@ -71,7 +73,6 @@ class Recommender:
                   visit_time = None,
                   use_weather = False,
                   use_only_ids = None
-                  # filter_rated = False
                  ):
         """
         Recommend a winery according to the specified parameters.
@@ -92,7 +93,6 @@ class Recommender:
         use_weather         - Use current weather conditions to filter out places (True/False, default is False)
 
         use_only_ids        - (debugging) Pretend only these place IDs exist.
-#        filter_rated        - Filter places the user has already rated
         """        
         
         #
@@ -104,6 +104,8 @@ class Recommender:
         if (location != None) and (not self._LegalLatlong(location)):
             raise ValueError("location was not a legal latlong tuple (given: %s)" % str(location))
 
+        if (self._check_userid and userid == ""):
+            raise ValueError("Nonempty User ID should be given")
 
         #
         # Make sure the input is legal
@@ -180,7 +182,7 @@ class SimpleWineryRecommender(Recommender):
         Recommender.__init__(self, 
                              places_recommender_data            = places_recommender_data,
                              weather_client                     = weather_client,
-                             integration_sorter_class           = integration.StupidIntegratorSorter,
+                             integration_sorter_class           = integration.LinearIntegratorSorter,
                              integration_filter_class           = integration.BasicIntegratorFilter,
                              recommender_system                 = recommender_systems.simple.ExpertRating(places_recommender_data))
 
@@ -198,14 +200,15 @@ class SlopeOneRecommender(Recommender):
         Recommender.__init__(self, 
                              places_recommender_data            = places_recommender_data,
                              weather_client                     = weather_client,
-                             integration_sorter_class           = integration.StupidIntegratorSorter,
+                             integration_sorter_class           = integration.LinearIntegratorSorter,
                              integration_filter_class           = integration.BasicIntegratorFilter,
                              recommender_system                 = recommender_systems.collaborative_filtering.SlopeOneRecommenderSystem(
                                                                     places_recommender_data,
                                                                     users_recommender_data,
-                                                                    rating_recommender_data)
+                                                                    rating_recommender_data, False)
                              )
 
+        self._check_userid = True
         
 __all__.append('WeightedSlopeOneRecommender')
 class WeightedSlopeOneRecommender(Recommender):
@@ -220,14 +223,15 @@ class WeightedSlopeOneRecommender(Recommender):
         Recommender.__init__(self, 
                              places_recommender_data            = places_recommender_data,
                              weather_client                     = weather_client,
-                             integration_sorter_class           = integration.StupidIntegratorSorter,
+                             integration_sorter_class           = integration.LinearIntegratorSorter,
                              integration_filter_class           = integration.BasicIntegratorFilter,
-                             recommender_system                 = recommender_systems.collaborative_filtering.WeightedSlopeOneRecommenderSystem(
+                             recommender_system                 = recommender_systems.collaborative_filtering.SlopeOneRecommenderSystem(
                                                                     places_recommender_data,
                                                                     users_recommender_data,
-                                                                    rating_recommender_data)
+                                                                    rating_recommender_data, True)
                              )        
-     
+        self._check_userid = True
+
       
 __all__.append('WeightedSlopeOneRecommender')
 class PearsonRecommender(Recommender):
@@ -242,7 +246,7 @@ class PearsonRecommender(Recommender):
         Recommender.__init__(self, 
                              places_recommender_data            = places_recommender_data,
                              weather_client                     = weather_client,
-                             integration_sorter_class           = integration.StupidIntegratorSorter,
+                             integration_sorter_class           = integration.LinearIntegratorSorter,
                              integration_filter_class           = integration.BasicIntegratorFilter,
                              recommender_system                 = recommender_systems.collaborative_filtering.PearsonRecommenderSystem(
                                                                     places_recommender_data,
@@ -250,7 +254,7 @@ class PearsonRecommender(Recommender):
                                                                     rating_recommender_data)
                              )        
            
-    
+        self._check_userid = True
     
                     
             

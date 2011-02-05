@@ -10,14 +10,16 @@ import warnings
 # Self impots
 import base
 
-class SlopeOneBase(base.RecommenderSystem):
+class SlopeOneRecommenderSystem(base.RecommenderSystem):
 
 	def __init__(self, 
 				 places_recommender_data,
 				 users_recommender_data,
-				 rating_recommender_data):
+				 rating_recommender_data,
+				 weighted = False):
 		base.RecommenderSystem.__init__(self, places_recommender_data, users_recommender_data, rating_recommender_data)
 		
+		self.weighted = weighted
 		self.CalculateDeviationMatrix()
 
 
@@ -51,69 +53,13 @@ class SlopeOneBase(base.RecommenderSystem):
 					self.deviation_matrix[placeid_j][placeid_i] += (-diff)
 				
 
+	def PredictRatingRaw(self, userid, placeid, force_predict=False):
 
-__all__.append("SlopeOneRecommenderSystem")
-class SlopeOneRecommenderSystem(SlopeOneBase):	
-
-	def PredictRating(self, userid, placeid, force_predict=False):
-
-		# If the rating already exists, just return it, unless mentioned otherwise		
-		if (not force_predict) and self.rating_recommender_data['by_user'][userid].has_key(placeid):
-			return self.rating_recommender_data['by_user'][userid][placeid]['rating']
-			
 		placeid_j = placeid
 
 		places_with_common_users = [placeid_i for placeid_i in self.rating_recommender_data['by_user'][userid].keys() \
 											  if placeid_i != placeid_j and self.common_users[placeid_i][placeid_j] > 0]
 											  
-
-
-		if len(places_with_common_users) == 0:			
-			# warnings.warn("Cannot predict - no common rating with anyone")
-			averaged_prediction = -1
-			
-		else:
-			total_prediction = 0.0
-			for placeid_i in places_with_common_users:
-				dev = self.deviation_matrix[placeid_j][placeid_i] / float(self.common_users[placeid_j][placeid_i])
-				user_rating = self.rating_recommender_data['by_user'][userid][placeid_i]['rating']
-
-				total_prediction += (dev + user_rating)
-
-			averaged_prediction = total_prediction / len(places_with_common_users)
-
-		# post processing:
-		# if we couldn't predict, return default value
-		if averaged_prediction == -1:
-			ret = self._default_rating
-
-		# check boundaries
-		elif averaged_prediction < self._min_rating:
-			ret = self._min_rating
-		elif averaged_prediction > self._max_rating:
-			ret = self._max_rating
-		else:
-			ret = averaged_prediction
-
-		return ret
-
-
-__all__.append("WeightedSlopeOneRecommenderSystem")
-class WeightedSlopeOneRecommenderSystem(SlopeOneBase):	
-
-	def PredictRating(self, userid, placeid, force_predict=False):
-
-		# If the rating already exists, just return it, unless mentioned otherwise		
-		if (not force_predict) and self.rating_recommender_data['by_user'][userid].has_key(placeid):
-			return self.rating_recommender_data['by_user'][userid][placeid]['rating']
-			
-		placeid_j = placeid
-
-		places_with_common_users = [placeid_i for placeid_i in self.rating_recommender_data['by_user'][userid].keys() \
-											  if placeid_i != placeid_j and self.common_users[placeid_i][placeid_j] > 0]
-											  
-
-
 		if len(places_with_common_users) == 0:			
 			# warnings.warn("Cannot predict - no common rating with anyone")
 			averaged_prediction = -1
@@ -126,27 +72,17 @@ class WeightedSlopeOneRecommenderSystem(SlopeOneBase):
 				dev = self.deviation_matrix[placeid_j][placeid_i] / float(self.common_users[placeid_j][placeid_i])
 				user_rating = self.rating_recommender_data['by_user'][userid][placeid_i]['rating']
 
-				weight = float(self.common_users[placeid_j][placeid_i])
+				if self.weighted:
+					weight = float(self.common_users[placeid_j][placeid_i])
+				else:
+					weight = 1.0
 				total_prediction += (dev + user_rating) * weight
 				total_weights = weight
 
 
 			averaged_prediction = total_prediction / total_weights
 
-		# post processing:
-		# if we couldn't predict, return default value
-		if averaged_prediction == -1:
-			ret = self._default_rating
-
-		# check boundaries
-		elif averaged_prediction < self._min_rating:
-			ret = self._min_rating
-		elif averaged_prediction > self._max_rating:
-			ret = self._max_rating
-		else:
-			ret = averaged_prediction
-
-		return ret
+		return averaged_prediction
 
 
 
@@ -236,13 +172,8 @@ class PearsonRecommenderSystem(base.RecommenderSystem):
 				self.user_sim_matrix[userid_j][userid_i] = gamma
 
 
-	def PredictRating(self, userid, placeid, force_predict=False):
+	def PredictRatingRaw(self, userid, placeid, force_predict=False):
 
-		# If the rating already exists, just return it, unless mentioned otherwise		
-		if (not force_predict) and self.rating_recommender_data['by_user'][userid].has_key(placeid):
-			return self.rating_recommender_data['by_user'][userid][placeid]['rating']
-			
-		
 		total_prediction = 0.0
 		total_weights = 0.0
 
@@ -258,18 +189,5 @@ class PearsonRecommenderSystem(base.RecommenderSystem):
 		if total_weights > 0:
 			averaged_prediction += total_prediction / total_weights
 
-		# post processing:
-		# if we couldn't predict, return default value
-		if averaged_prediction == -1:
-			ret = self._default_rating
-
-		# check boundaries
-		elif averaged_prediction < self._min_rating:
-			ret = self._min_rating
-		elif averaged_prediction > self._max_rating:
-			ret = self._max_rating
-		else:
-			ret = averaged_prediction
-
-		return ret
+		return averaged_prediction
 		

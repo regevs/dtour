@@ -156,6 +156,20 @@ class StupidIntegratorSorter(IntegratorSorter):
         return res
 
 
+__all__.append("LinearIntegratorSorter")
+class LinearIntegratorSorter(IntegratorSorter):
+    """
+    A linear integrator sorter.
+
+    There is no consideration here for the required radius. 
+    The weights have been learned according to a user survey.
+    """
+
+    _beta = -0.028
+
+    def Score(self, distance, rating, required_radius=None):
+        res = rating + self._beta * distance * 1000
+        return res
 
 
 
@@ -169,29 +183,84 @@ class StupidIntegratorSorter(IntegratorSorter):
         
 
 #
-# Helping functions for the generation of tests cases for the integration sorter
+# Helping functions for the analysis of tests cases for the integration sorter
 #
-
-def random_case():  
-    required_radius = [5, 10, 20, 50, 100, 150, 200]
-    possible_rating = [1, 2, 3, 4, 5]
-    distances = range(5,55,5) + range(50,210,10)
-
-    while True:
-        radius = random.choice(required_radius)
-        rating1 = random.choice(possible_rating)
-        rating2 = random.choice(possible_rating)
-        distance1 = random.choice(distances)
-        distance2 = random.choice(distances)
-        if ((rating1 < rating2) and (distance1 < distance2)) or ((rating2 < rating1) and (distance2 < distance1)):
-            break
-
-    return (radius, rating1, distance1, rating2, distance2)
-
 
 
 def create_test_cases(n_cases, filename):   
+
+    def random_case():  
+        required_radius = [5, 10, 20, 50, 100, 150, 200]
+        possible_rating = [1, 2, 3, 4, 5]
+        distances = range(5,55,5) + range(50,210,10)
+
+        while True:
+            radius = random.choice(required_radius)
+            rating1 = random.choice(possible_rating)
+            rating2 = random.choice(possible_rating)
+            distance1 = random.choice(distances)
+            distance2 = random.choice(distances)
+
+            # don't put cases which are trivial 
+            if ((rating1 < rating2) and (distance1 < distance2)) or ((rating2 < rating1) and (distance2 < distance1)):
+                break
+
+        return (radius, rating1, distance1, rating2, distance2)
+
     cases = [random_case() for i in xrange(n_cases)]
     writer = csv.writer(file(filename, 'wb'), lineterminator='\n')
     writer.writerows(cases)
+
+
+def anaylze_integration_survey(filename=r"c:\temp\Integration Score Survey.csv", required_radius=None, consensus=6):
+    import misc
+
+    thres = consensus
+    filt_rad = required_radius
+
+    def find_frequent(a):        
+        c = misc.count(a)
+        m = max([(v,k) for k,v in c.items()])[1]
+        return m
+
+    def count_frequent(a):
+        m = find_frequent(a)
+        return len([x for x in a if x == m])
+
+    # read all lines and turn into integers
+    lines = [map(int, l) for l in list(csv.reader(file(filename, 'rb')))[1:]]
+    
+    # switch it so the lower rating will be left
+    newlines = []
+    for l in lines:
+        if l[1]<l[3]:
+            newlines.append(l)
+        else:
+            nl = [l[0]] + l[3:5] + l[1:3] + [(1 if x==2 else 2) for x in l[5:]]
+            newlines.append(nl)
+
+    # sort according to consistency
+    newlines = [x + [count_frequent(x[5:])] for x in newlines]
+    res = sorted(newlines, key=lambda x: (x[-1], find_frequent(x[5:5+7]), x[0], x[2], x[4], x[1], x[3]))
+
+    # make regression input
+    reg = [(x[:5], find_frequent(x[5:5+7])) for x in res if x[-1] >= thres and (filt_rad == None or x[0] == filt_rad)]
+
+    return reg
+
+def find_best_linear(input):
+    # reorder so right should be chosen, throw radius
+    a = [(x[0][1:5] if x[1]==2 else x[0][3:5]+x[0][1:3]) for x in input]
+    b = [((float(x[0]-x[2])/float(x[3]-x[1])), float(x[3]-x[1])>0) for x in a]
+    rng = min([x[0] for x in b]), max([x[0] for x in b])
+    step = 0.001
+    scores = [(len([x for x in b if x[1]==True and x[0]<beta]) + len([x for x in b if x[1]!=True and x[0]>beta])  , beta) for beta in arange(rng[0], rng[1]+step, step)]
+    x = sorted(scores)[-1]
+    return (x[1], x[0], len(input))
+
+
+
+
+
+
 
