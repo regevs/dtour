@@ -6,7 +6,6 @@ __author__ = "Regev S"
 
 
 import warnings
-from numpy import *
 
 # Self imports
 import base
