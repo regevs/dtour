@@ -12,7 +12,8 @@ import integration
 
 import recommender_systems
 import recommender_systems.simple
-import recommender_systems.collaborative_filtering
+import recommender_systems.item_based
+import recommender_systems.user_based
 
 
 class NiceList(list):
@@ -210,7 +211,7 @@ class SlopeOneRecommender(Recommender):
                              weather_client                     = weather_client,
                              integration_sorter_class           = integration.LinearIntegratorSorter,
                              integration_filter_class           = integration.BasicIntegratorFilter,
-                             recommender_system                 = recommender_systems.collaborative_filtering.SlopeOneRecommenderSystem(
+                             recommender_system                 = recommender_systems.item_based.SlopeOneRecommenderSystem(
                                                                     places_recommender_data,
                                                                     users_recommender_data,
                                                                     rating_recommender_data, False)
@@ -233,7 +234,7 @@ class WeightedSlopeOneRecommender(Recommender):
                              weather_client                     = weather_client,
                              integration_sorter_class           = integration.LinearIntegratorSorter,
                              integration_filter_class           = integration.BasicIntegratorFilter,
-                             recommender_system                 = recommender_systems.collaborative_filtering.SlopeOneRecommenderSystem(
+                             recommender_system                 = recommender_systems.item_based.SlopeOneRecommenderSystem(
                                                                     places_recommender_data,
                                                                     users_recommender_data,
                                                                     rating_recommender_data, True)
@@ -256,7 +257,7 @@ class PearsonRecommender(Recommender):
                              weather_client                     = weather_client,
                              integration_sorter_class           = integration.LinearIntegratorSorter,
                              integration_filter_class           = integration.BasicIntegratorFilter,
-                             recommender_system                 = recommender_systems.collaborative_filtering.PearsonRecommenderSystem(
+                             recommender_system                 = recommender_systems.user_based.PearsonRecommenderSystem(
                                                                     places_recommender_data,
                                                                     users_recommender_data,
                                                                     rating_recommender_data)

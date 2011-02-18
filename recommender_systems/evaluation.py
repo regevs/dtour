@@ -18,6 +18,8 @@ class AllButOneMeanAverageError(Evaluator):
 		n_users = len(recommender_system.rating_recommender_data['by_user'])
 		total_averages = 0.0
 
+		self.rating_data = []
+
 		for userid, rated_places in recommender_system.rating_recommender_data['by_user'].iteritems():
 
 			n_rated_places = len(rated_places)
@@ -35,6 +37,8 @@ class AllButOneMeanAverageError(Evaluator):
 				total_average_error += abs_diff
 
 			total_averages += (float(total_average_error) / n_rated_places)
+
+			self.rating_data.append((n_rated_places, (float(total_average_error) / n_rated_places)))
 
 		mae = total_averages / n_users
 

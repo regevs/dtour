@@ -1,4 +1,4 @@
 #
 # recommender_systems package file
 #
-__all__ = ["simple", "collaborative_filtering", "evaluation"]
+__all__ = ["simple", "user_based", "item_based", "evaluation"]
