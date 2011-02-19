@@ -12,9 +12,11 @@ import misc
 import data_processing
 import recommenders
 import recommender_systems
+import recommender_systems.base
 import recommender_systems.simple
 import recommender_systems.user_based
 import recommender_systems.item_based
+import recommender_systems.hybrid
 import recommender_systems.evaluation
 import weather
 import integration
@@ -24,10 +26,11 @@ import integration
 reload(misc)
 reload(data_processing)
 reload(recommenders)
-reload(recommender_systems)
+reload(recommender_systems.base)
 reload(recommender_systems.simple)
 reload(recommender_systems.user_based)
 reload(recommender_systems.item_based)
+reload(recommender_systems.hybrid)
 reload(recommender_systems.evaluation)
 reload(weather)
 reload(integration)
@@ -85,6 +88,8 @@ SW = recommenders.SimpleWineryRecommender(RD_places, weather.GoogleWeather())
 SWJ = recommenders.SimpleWineryRecommender(RD_places, weather.RainyInJerusalem())
 
 
+TF = recommenders.TFIDFRecommender(RD_places, RD_users, RD_rating, weather.GoogleWeather())
+HY = recommenders.HybridRecommender(RD_places, RD_users, RD_rating, weather.GoogleWeather())
 
 
 # Evaluators

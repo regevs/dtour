@@ -22,6 +22,8 @@ class RecommenderSystem(object):
 
 		self.SetDefaultRating()
 
+	def PreprocessWeights(self):
+		pass
 
 	def SetDefaultRating(self):
 
@@ -45,7 +47,7 @@ class RecommenderSystem(object):
 		if (not force_predict) and self.rating_recommender_data['by_user'][userid].has_key(placeid):
 			return self.rating_recommender_data['by_user'][userid][placeid]['rating']
 
-		averaged_prediction = self.PredictRatingRaw(userid, placeid, force_predict=force_predict)
+		averaged_prediction = self.PredictRatingRaw(userid, placeid)
 
 		# post processing:
 		# if we couldn't predict, return default value
@@ -62,7 +64,7 @@ class RecommenderSystem(object):
 
 		return ret
 
-	def PredictRatingRaw(self, userid, placeid, force_predict=False):
+	def PredictRatingRaw(self, userid, placeid):
 		raise NotImplementedError()
 
 

@@ -242,7 +242,7 @@ class WeightedSlopeOneRecommender(Recommender):
         self._check_userid = True
 
       
-__all__.append('WeightedSlopeOneRecommender')
+__all__.append('PearsonRecommender')
 class PearsonRecommender(Recommender):
 
 
@@ -267,9 +267,65 @@ class PearsonRecommender(Recommender):
     
                     
             
+__all__.append('TFIDFRecommender')
+class TFIDFRecommender(Recommender):
+
+
+    def __init__(self, 
+                 places_recommender_data,
+                 users_recommender_data,
+                 rating_recommender_data, 
+                 weather_client=None):
+        
+        Recommender.__init__(self, 
+                             places_recommender_data            = places_recommender_data,
+                             weather_client                     = weather_client,
+                             integration_sorter_class           = integration.LinearIntegratorSorter,
+                             integration_filter_class           = integration.BasicIntegratorFilter,
+                             recommender_system                 = recommender_systems.item_based.TFIDFRecommenderSystem(
+                                                                    places_recommender_data,
+                                                                    users_recommender_data,
+                                                                    rating_recommender_data, 
+                                                                    [], 
+                                                                    ['kosher', 'visiting_center', 'size', 'expert_rank'])
+                             )        
+           
+        self._check_userid = True
+                    
                 
-                
-            
+__all__.append('HybridRecommender')
+class HybridRecommender(Recommender):
+
+
+    def __init__(self, 
+                 places_recommender_data,
+                 users_recommender_data,
+                 rating_recommender_data, 
+                 weather_client=None):
+        
+        collab_rs = recommender_systems.user_based.PearsonRecommenderSystem(
+                                                                    places_recommender_data,
+                                                                    users_recommender_data,
+                                                                    rating_recommender_data)
+
+        content_rs = recommender_systems.item_based.TFIDFRecommenderSystem(
+                                                                    places_recommender_data,
+                                                                    users_recommender_data,
+                                                                    rating_recommender_data, 
+                                                                    [], 
+                                                                    ['kosher', 'visiting_center', 'size', 'expert_rank'])
+
+        hybrid_rs = recommender_systems.hybrid.LinearHybridRecommender([collab_rs, content_rs], [ 1.03326833, -0.03694432])
+
+        Recommender.__init__(self, 
+                             places_recommender_data            = places_recommender_data,
+                             weather_client                     = weather_client,
+                             integration_sorter_class           = integration.LinearIntegratorSorter,
+                             integration_filter_class           = integration.BasicIntegratorFilter,
+                             recommender_system                 = hybrid_rs
+                             )        
+           
+        self._check_userid = True            
             
         
         

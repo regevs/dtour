@@ -32,6 +32,8 @@ class AllButOneMeanAverageError(Evaluator):
 				user_rating = v['rating']
 				predicted_rating = recommender_system.PredictRating(userid, placeid, force_predict=True)
 
+				# print userid, placeid, user_rating, predicted_rating
+
 				abs_diff = abs(user_rating - predicted_rating)
 
 				total_average_error += abs_diff
@@ -43,4 +45,34 @@ class AllButOneMeanAverageError(Evaluator):
 		mae = total_averages / n_users
 
 		return mae
+
+
+class Optimizer(object):
+	def Optimize(self, recommender_system):
+		raise NotImplementedError()
+
+__all__.append("WeightOptimizer")
+class WeightOptimizer(Optimizer):
+	"assumes the recommender system has a dictionary of weights"
+
+	_evaluator = AllButOneMeanAverageError()
+
+	def Optimize(self, recommender_system):
+	
+		def optfunc(weights, recommender_system):
+			for i,k in enumerate(recommender_system.weights.keys()):
+				recommender_system.weights[k] = weights[i]
+			
+			
+			recommender_system.PreprocessWeights()
+			
+			ret = self._evaluator.Evaluate(recommender_system)
+			print weights, ret
+			return ret
+			
+		import scipy.optimize
+
+		x0 = [1.0] * len(recommender_system.weights)
+
+		return scipy.optimize.fmin(optfunc, x0, args=(recommender_system,))
 

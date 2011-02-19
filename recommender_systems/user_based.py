@@ -106,7 +106,7 @@ class PearsonRecommenderSystem(UserBasedRecommenderSystem):
 				self.user_sim_matrix[userid_j][userid_i] = gamma
 
 
-	def PredictRatingRaw(self, userid, placeid, force_predict=False):
+	def PredictRatingRaw(self, userid, placeid):
 
 		total_prediction = 0.0
 		total_weights = 0.0

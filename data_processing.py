@@ -69,7 +69,7 @@ class GeocodingCache:
     
     >>> G = GeocodingCache(filename)
     >>> G["Jerusalem, Israel"]
-    (u'Jerusalem, Israel', (31.768861999999999, 35.203856000000002))
+    (u'Jerusalem, Israel', (31.768862, 35.203856))
     
     
     """
