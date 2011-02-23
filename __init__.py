@@ -89,7 +89,9 @@ SWJ = recommenders.SimpleWineryRecommender(RD_places, weather.RainyInJerusalem()
 
 
 TF = recommenders.TFIDFRecommender(RD_places, RD_users, RD_rating, weather.GoogleWeather())
-HY = recommenders.HybridRecommender(RD_places, RD_users, RD_rating, weather.GoogleWeather())
+HY = recommenders.HybridLinearRecommender(RD_places, RD_users, RD_rating, weather.GoogleWeather())
+HY2 = recommenders.HybridAugmentedRecommender(RD_places, RD_users, RD_rating, weather.GoogleWeather())
+
 
 
 # Evaluators
@@ -111,3 +113,6 @@ def csvwrite(rows, filename=r"c:\temp\regev.csv"):
 def geocode(place):
 	return GC[place][1]
 
+def random_user():
+	import random
+	return random.choice(RD_users.keys())

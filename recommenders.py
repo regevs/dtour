@@ -293,8 +293,8 @@ class TFIDFRecommender(Recommender):
         self._check_userid = True
                     
                 
-__all__.append('HybridRecommender')
-class HybridRecommender(Recommender):
+__all__.append('HybridLinearRecommender')
+class HybridLinearRecommender(Recommender):
 
 
     def __init__(self, 
@@ -328,4 +328,32 @@ class HybridRecommender(Recommender):
         self._check_userid = True            
             
         
+__all__.append('HybridAugmentedRecommender')
+class HybridAugmentedRecommender(Recommender):
+
+
+    def __init__(self, 
+                 places_recommender_data,
+                 users_recommender_data,
+                 rating_recommender_data, 
+                 weather_client=None):
         
+        collab_rs = recommender_systems.user_based.PearsonRecommenderSystem(
+                                                                    places_recommender_data,
+                                                                    users_recommender_data,
+                                                                    rating_recommender_data)
+
+        content_rs_class = recommender_systems.item_based.TFIDFRecommenderSystem
+
+
+        hybrid_rs = recommender_systems.hybrid.FeatureAugmentRecommender(content_rs_class, collab_rs, [], ['kosher', 'visiting_center', 'size', 'expert_rank'])
+
+        Recommender.__init__(self, 
+                             places_recommender_data            = places_recommender_data,
+                             weather_client                     = weather_client,
+                             integration_sorter_class           = integration.LinearIntegratorSorter,
+                             integration_filter_class           = integration.BasicIntegratorFilter,
+                             recommender_system                 = hybrid_rs
+                             )        
+           
+        self._check_userid = True              
