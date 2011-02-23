@@ -357,3 +357,30 @@ class HybridAugmentedRecommender(Recommender):
                              )        
            
         self._check_userid = True              
+
+
+__all__.append('DemographicRecommender')
+class DemographicRecommender(Recommender):
+
+
+    def __init__(self, 
+                 places_recommender_data,
+                 users_recommender_data,
+                 rating_recommender_data, 
+                 weather_client=None):
+        
+        Recommender.__init__(self, 
+                             places_recommender_data            = places_recommender_data,
+                             weather_client                     = weather_client,
+                             integration_sorter_class           = integration.LinearIntegratorSorter,
+                             integration_filter_class           = integration.BasicIntegratorFilter,
+                             recommender_system                 = recommender_systems.user_based.DemographicRecommenderSystem(
+                                                                    places_recommender_data,
+                                                                    users_recommender_data,
+                                                                    rating_recommender_data, 
+                                                                    ['sex', 'job', 'zip'], 
+                                                                    ['age'])
+                             )        
+           
+        self._check_userid = True
+

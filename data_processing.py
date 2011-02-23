@@ -268,6 +268,9 @@ class PlacesRecommenderData(RecommenderData):
 __all__.append("UsersRecommenderData")
 class UsersRecommenderData(RecommenderData):
 
+    _legal_ages = map(str, range(1,101))
+    _legal_sexes = ['M', 'F']
+
     def UpdateFromGoogle(self, google_results, verbose=False):
         """
         Add or update information from data download from a google spreadsheet using GoogleSpreadsheetAcquisitor.
@@ -285,6 +288,21 @@ class UsersRecommenderData(RecommenderData):
             
             # Raw information
             self.data[uid]['raw'] = result
+
+            # age
+            self.data[uid]['age'] = self._ReturnIfLegal(uid, result['age'], self._legal_ages)
+            if self.data[uid]['age'] != None:
+                self.data[uid]['age'] = int(self.data[uid]['age'])
+
+            # sex
+            self.data[uid]['sex'] = self._ReturnIfLegal(uid, result['sex'], self._legal_sexes)
+            
+            # job
+            self.data[uid]['job'] = result['job']
+
+            # zip
+            self.data[uid]['zip'] = result['zip']
+
 
 __all__.append("RatingRecommenderData")
 class RatingRecommenderData(RecommenderData):

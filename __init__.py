@@ -92,6 +92,10 @@ TF = recommenders.TFIDFRecommender(RD_places, RD_users, RD_rating, weather.Googl
 HY = recommenders.HybridLinearRecommender(RD_places, RD_users, RD_rating, weather.GoogleWeather())
 HY2 = recommenders.HybridAugmentedRecommender(RD_places, RD_users, RD_rating, weather.GoogleWeather())
 
+DEMO = recommenders.DemographicRecommender(RD_places, RD_users, RD_rating, weather.GoogleWeather())
+
+
+
 
 
 # Evaluators
@@ -116,3 +120,8 @@ def geocode(place):
 def random_user():
 	import random
 	return random.choice(RD_users.keys())
+
+def syncall(passwd):
+	RD_places.Sync(passwd)
+	RD_users.Sync(passwd)
+	RD_rating.Sync(passwd)
